@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -239,18 +240,119 @@ namespace Northwind
 
 
 		}
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
+		public void Query22() {
+			//Write a LINQ query to check if all orders in the Orders table placed in 1996 have a non-null ShippedDate.
+
+			var query = context.Orders.All(e => e.OrderDate.Value.Year == 1996);
+
+
+		}
+		public void Query23() {
+			//Write a LINQ query to retrieve the ProductID and ProductName of the first product in
+			//the Products table whose UnitPrice is less than 20.
+
+			var query = context.Products.Where(e => e.UnitPrice < 20).Select(e=>new
+			{
+				ProductID=e.ProductId,
+				ProductName=e.ProductName,
+			}).FirstOrDefault();
+		}
+		public void Query24() {
+			//Write a LINQ query to retrieve the SupplierID and CompanyName of the last supplier in the
+			//Suppliers table when sorted by SupplierID in ascending order.
+
+			var query = context.Suppliers.Select(e => new
+			{
+				SupplierID = e.SupplierId,
+				CompanyName = e.CompanyName,
+			}).OrderBy(e => e.SupplierID).LastOrDefault();
+		}
+		public void Query25() {
+			//Write a LINQ query to check if any employee in the Employees table has handled an order in 1997
+			//with a Freight cost greater than 150.
+
+			var query = context.Employees
+				       .Any(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997 && e.Freight > 150));
+		}
+		public void Query26() {
+			//Write a LINQ query to check if all products in the Products table with CategoryID = 3
+			//have UnitsInStock greater than 5.
+
+			var query = context.Products.Where(e => e.CategoryId == 3).All(p => p.UnitsInStock > 5);
+		}
+		public void Query27() {
+			//Write a LINQ query to retrieve the CustomerID and CompanyName of the first customer
+			//in the Customers table who has placed an order in 1998, sorted by CompanyName in ascending order.
+
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1998))
+								  .Select(e => new
+								  {
+									  CustomerID = e.CustomerId,
+									  CompanyName = e.CompanyName
+								  }).OrderBy(e => e.CompanyName).FirstOrDefault();
+		}
+		public void Query28() {
+			//Write a LINQ query to retrieve the OrderID and OrderDate of the last order in the Orders table
+			//placed by customers whose Country is "Italy", sorted by OrderDate in descending order.
+
+			var query = context.Orders.Where(e => e.Customer.Country == "Italy").Select(e => new
+			{
+				OrderID = e.OrderId,
+				OrderDate = e.OrderDate
+			}).OrderByDescending(e => e.OrderDate).LastOrDefault();
+		}
+		public void Query29() {
+			//Write a LINQ query to check if any product in the Products table has been ordered in an
+			//order placed by a customer from "Germany" with a Quantity greater than 30 and a Discount greater than 0.
+
+			var query = context.Products
+				 .Any(e => e.OrderDetails.Any(e => e.Order.Customer.Country == "Germany" && e.Quantity > 30 && e.Discount > 0));
+		}
+		public void Query30() {
+			//عايزين نعرف هل كل الموظفين اللي اشتغلوا على طلبات في سنة 1998 عندهم على الأقل طلب واحد
+			//في نفس السنة، تكون قيمته أكبر من 2000 ولا لأ؟
+			//Employee have orders in 1998 //الموضف بالميت عنده طلب بالتاريخ ده 
+			var query = context.Employees.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1998))
+							 ;
+
+
+           // بعد اما جبنا الموضفين الي اشتغلو علي طلب في سنة 1998
+		   // هل كل موضف من دوا عنده طلب  قيكته اكبر من 2000
+		}
+		public void Query31() {
+			//Write a LINQ query to retrieve the EmployeeID and LastName of the first employee in the Employees table
+			//who has handled an order in 1997 with a Freight cost greater than 100,
+			//sorted by LastName in ascending order. If no such employee exists,
+			//return a default object with EmployeeID = -1 and LastName = "Not Found".
+
+
+
+
+		}
+		public void Query32() {
+			//Check if all customers who placed orders in 1997 have at least one order with a
+			//Freight cost greater than 150.
+
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997))
+									.All(e => e.Orders
+										.Where(e =>  e.OrderDate.Value.Year == 1997)
+										.Any(e => e.Freight > 150));
+
+		}
+		public void Query33()
+		{
+
+			//	Check if all employees who handled orders in 1996 have at least one order that contains
+			//	more than 3 different products(i.e., order details count > 3).
+
+			var query = context.Employees.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1996))
+								  .All(e => e.Orders.Where(e => e.OrderDate.Value.Year == 1996)
+								  .Any(e => e.OrderDetails.Count() > 3));
+
+
+
+
+		}
 		//public void Query1() { }
 		//public void Query1() { }
 		//public void Query1() { }

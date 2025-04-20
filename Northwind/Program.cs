@@ -10,19 +10,7 @@ namespace Northwind
 	{
 		static void Main(string[] args)
 		{
-			Projection projection = new Projection();
-			projection.Query38();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			Console.WriteLine();
-			projection.Query39();
+	
 		}
 	}
 }
