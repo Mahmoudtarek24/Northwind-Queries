@@ -349,15 +349,56 @@ namespace Northwind
 								  .All(e => e.Orders.Where(e => e.OrderDate.Value.Year == 1996)
 								  .Any(e => e.OrderDetails.Count() > 3));
 
+		}
+		public void Query34() {
+			//Check if all customers who placed orders in 1997 have at least one order with
+			//a Freight cost greater than 150.
 
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997))
+						  .All(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997 && e.Freight > 150));
+
+		}
+		public void Query35() {
+			//Check if all employees who handled orders in 1996 have at least one order
+			//that contains more than 3 products (OrderDetails.Count > 3).
+
+			var query = context.Employees.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1996))
+						  .All(e => e.Orders.Where(e => e.OrderDate.Value.Year == 1996)
+						  .Any(e => e.OrderDetails.Count > 3));
+
+			var result = context.Employees
+				.Where(e => e.Orders.Any(o => o.OrderDate.Value.Year == 1996))
+				.All(e => e.Orders.Any(o => o.OrderDate.Value.Year == 1996 && o.OrderDetails.Count > 3));
+
+		}
+		public void Query36() {
+			//Check if all suppliers who have products in stock (UnitsInStock > 0)
+			//have at least one product with UnitPrice greater than 50.
+
+			var query = context.Suppliers
+						.Where(s => s.Products != null && s.Products.Any(p => p.UnitsInStock > 0))
+						.All(s => s.Products.Any(p => p.UnitPrice > 50));
+
+		}
+		public void Query37() {
+			//Check if all customers who ordered in 1998 have at least one order shipped
+			//to a different country than their own.
+
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1998))
+						  .All(e => e.Orders.Any(o => o.OrderDate.Value.Year == 1998 && o.ShipCountry != e.Country));
+		}
+		public void Query38()
+		{
+			//Check if all employees who handled orders in 1997 have at least one order with a
+			//total order value greater than 3000.
+
+			var query = context.Employees.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997))
+							 .All(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997
+							 && e.OrderDetails.Sum(e => e.Quantity * e.UnitPrice) > 3000));
+			                       
 
 
 		}
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
 		//public void Query1() { }
 		//public void Query1() { }
 		//public void Query1() { }
