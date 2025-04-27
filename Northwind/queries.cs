@@ -399,10 +399,46 @@ namespace Northwind
 
 
 		}
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
-		//public void Query1() { }
+		public void Query39() {
+			//Check if all customers who ordered more than once in 1998 have at least one order with Freight less than 50.
+
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1998))
+							  .All(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1998 && e.Freight < 50));
+
+
+		}
+		public void Query40() {
+			//Check if all employees who have more than 5 orders have at least one order
+			//where all products (OrderDetails) have UnitPrice > 20.
+
+			var query = context.Employees.Where(e => e.Orders.Count() > 5)
+									   .All(e => e.Orders.Any(e => e.OrderDetails.All(e => e.UnitPrice > 20)));
+
+
+
+		}
+		public void Query41() {
+			//Check if all customers who placed orders in 1997 have at least one order that
+			//includes a product from CategoryID = 1.
+
+
+			var query = context.Customers.Where(e => e.Orders.Any(e => e.OrderDate.Value.Year == 1997))
+									   .All(e => e.Orders.Any(e => e.OrderDetails.Any(e => e.Product.CategoryId == 1)));
+
+		}
+		public void Query42() {
+			//Check if all employees who handled orders in December 1998 have at least one
+			//order shipped within 7 days (ShippedDate - OrderDate <= 7 days).
+
+			var query = context.Employees
+					.Where(e => e.Orders.Any(o => o.OrderDate.Value.Year == 1998 && o.OrderDate.Value.Month == 12))
+					.All(e => e.Orders.Any(o => o.OrderDate.Value.Year == 1998 &&
+								o.OrderDate.Value.Month == 12 &&
+								o.ShippedDate.HasValue &&
+								(o.ShippedDate.Value - o.OrderDate.Value).Days <= 7));
+
+
+		}
 
 	}
 }
