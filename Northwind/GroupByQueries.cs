@@ -240,6 +240,252 @@ namespace Northwind
 							 }).Where(e=>e.maxUnitsInStock<100).ToList();	
 
 		}
+		public void Query16(){
+			//Write a LINQ query to group the Orders table by CustomerID and retrieve a list of CustomerID,
+			//the count of orders, and the total Freight cost for each customer.
+			//Only include customers whose orders were placed in 1997,
+			//and sort the results by total Freight cost in descending order.
+
+			var query = context.Orders.Where(e => e.OrderDate.Value.Year == 1997).GroupBy(e => e.CustomerId)
+								  .Select(e => new
+								  {
+									  CustomerID = e.Key,
+									  countoforders = e.Count(),
+									  Freightcost = e.Sum(e => e.Freight)
+								  }).OrderByDescending(e => e.Freightcost).ToList();
+
+
+		}
+		public void Query17(){
+			//Write a LINQ query to group the Order Details table by ProductID and retrieve a list of ProductID
+			//and the total Quantity ordered for each product.
+			//Only include products ordered in orders placed in 1998,
+			//and sort the results by total Quantity in descending order.
+
+			var query =context.OrderDetails.Where(e=>e.Order.OrderDate.Value.Year==1998).GroupBy(e=>e.ProductId)
+				                     .Select(e=>new
+									 {
+										 ProductID=e.Key,
+										 totalQuantityOrdered=e.Sum(e=>e.Quantity)
+									 }).OrderByDescending(e=>e.totalQuantityOrdered).ToList();	
+
+		}
+		public void Query18(){
+			//Write a LINQ query to group the Orders table by EmployeeID and retrieve a list of EmployeeID,
+			//the count of orders, and the average Freight cost for each employee.
+			//Only include employees who handled orders shipped to "Germany",
+			//and sort the results by average Freight cost in ascending order.
+
+
+			var query =context.Orders.Where(e=>e.ShipCountry== "Germany").GroupBy(e=>e.EmployeeId)
+									  .Select(e => new{
+										  EmployeeID=e.Key,
+										  countOfOrders=e.Count(),
+										  averageFreight=e.Average(e=>e.Freight)	
+									  })
+									  .OrderBy(e=>e.averageFreight).ToList();	
+		}
+		public void Query19(){
+			//Write a LINQ query to group the Order Details table by OrderID and retrieve a list of OrderID
+			//and the total value (sum of UnitPrice * Quantity) for each order.
+			//Only include orders with a total value greater than 1000,
+			//and sort the results by total value in descending order.
+
+			var query=context.OrderDetails.GroupBy(e=>e.OrderId)
+										   .Select(e => new
+										   {
+											   OrderId=e.Key,	
+											   totalValue=e.Sum(e=>e.UnitPrice*e.Quantity)
+										   }).Where(e=>e.totalValue>1000).OrderByDescending(e=>e.totalValue).ToList();	
+
+
+		}
+		public void Query20(){
+			//Write a LINQ query to group the Orders table by the year of OrderDate and retrieve a list of the year,
+			//the count of orders, and the maximum Freight cost for each year.
+			//Only include years with more than 50 orders,
+			//and sort the results by the count of orders in descending order.
+
+			var query =context.Orders.GroupBy(e=>e.OrderDate.Value.Year)
+									 .Select(e => new
+									 {
+										 listoftheyear=e.Key,
+										 countoforders=e.Count(),
+										 maxFright=e.Max(e=>e.Freight),
+									 }).Where(e=>e.countoforders>50).OrderByDescending(e=>e.countoforders).ToList();	
+
+		}
+		public void Query21(){
+			//Write a LINQ query to group the Order Details table by ProductID
+			//and retrieve a list of ProductID and the average Discount applied for each product.
+			//Only include products with orders from customers in "France",
+			//and sort the results by average Discount in descending order.
+
+
+			var query =context.OrderDetails.Where(e=>e.Order.Customer.Country== "France").GroupBy(e=>e.ProductId)
+											.Select(e => new
+											{
+												ProductID=e.Key,
+												averageDiscount=e.Average(e=>e.Discount)
+											}).OrderByDescending(e=>e.averageDiscount).ToList();	
+
+
+		}
+		public void Quer22()
+		{
+			//Write a LINQ query to group the Orders table by ShipVia and retrieve a list of ShipVia,
+			//the count of orders, and the minimum Freight cost for each shipper.
+			//Only include orders placed in 1996, and sort the results by minimum Freight cost in ascending order.
+
+
+			var query = context.Orders.Where(e=>e.OrderDate.Value.Year==1996).GroupBy(e => e.ShipVia)
+								.Select(e => new
+								{
+									ShipVia=e.Key,	
+									OrderCount=e.Count(),	
+									MFrightCost=e.Min(e=>e.Freight)	
+								}).OrderBy(e=>e.MFrightCost).ToList();	
+
+		}
+		//public void Query1(){}
+		public void Query23(){
+			//Write a LINQ query to group the Order Details table by OrderID and
+			//retrieve a list of OrderID, the total Quantity,
+			//and the total discount amount (sum of UnitPrice * Quantity * Discount) for each order.
+			//Only include orders placed in 1996, and sort the results by total discount amount in descending order.
+
+
+			var query = context.OrderDetails.Where(e => e.Order.OrderDate.Value.Year == 1996).GroupBy(e => e.OrderId)
+										.Select(e => new
+										{
+											OrderId = e.Key,
+											TotalQuentity = e.Sum(e => e.Quantity),
+											TotalDiscount = e.Sum(e => e.UnitPrice * e.Quantity * (decimal)e.Discount),
+										}).OrderByDescending(e => e.TotalDiscount).ToList();
+		}
+		public void Query24(){
+			//Group the products by CategoryID and return the count of products in each category.
+
+			var query =context.Products.GroupBy(e=>e.CategoryId).Select(e=>new {CountProduct=e.Key}).ToList();	
+
+		}
+		public void Query25(){
+			//Find all employees, group them by Region, and calculate
+			//how many employees are in each region (some may have null regions).
+
+
+			var query=context.Employees.GroupBy(e=>e.Region).Select(e=>new {regionCount=e.Key});	
+
+		}
+		public void Query26(){
+			//Write a LINQ query to group the Orders table by CustomerID,
+			//retrieve a list of CustomerID and the count of orders for each customer,
+			//and then check if any customer from "Germany" has placed more than 10 orders. Return a boolean result.
+
+
+			var query = context.Orders.Where(e => e.Customer.Country == "Germany").GroupBy(e => e.CustomerId)
+								   .Select(e => new
+								   {
+									   CustomerID = e.Key,
+									   countofOrders = e.Count()
+								   }).Any(e => e.countofOrders > 10);
+		}
+		public void Query27(){
+			//Write a LINQ query to group the Order Details table by ProductID,
+			//retrieve a list of ProductID and the total Quantity ordered for each product,
+			//and then find the first product (sorted by ProductID in ascending order)
+			//that has a total Quantity greater than 500 and was ordered in 1997.
+
+
+			var query = context.OrderDetails.Where(e=>e.Order.OrderDate.Value.Year==1997).GroupBy(e => e.ProductId)
+										  .Select(e => new
+										  {
+											  ProductID = e.Key,
+											  totalQuantityordered = e.Sum(e => e.Quantity)
+										  }).Where(e => e.totalQuantityordered > 500).OrderBy(e => e.ProductID).FirstOrDefault();
+
+		}
+		public void Query28(){
+			//Write a LINQ query to group the Orders table by EmployeeID,
+			//retrieve a list of EmployeeID and the total Freight cost for each employee,
+			//and then check if all employees who handled orders in 1998 have a total Freight cost greater than 1000.
+			//Return a boolean result.
+
+			var query = context.Orders.Where(e => e.OrderDate.Value.Year == 1998).GroupBy(e => e.EmployeeId)
+								   .Select(e => new
+								   {
+									   EmployeeID = e.Key,
+									   totalFreightCost = e.Sum(e => e.Freight)
+								   }).All(e => e.totalFreightCost > 1000);
+
+		}
+		public void Query29(){
+			//Write a LINQ query to group the Order Details table by OrderID,
+			//retrieve a list of OrderID and the total value (sum of UnitPrice * Quantity) for each order,
+			//and then take the top 5 orders (sorted by total value in descending order)
+			//that were placed by customers whose Country is "France".
+
+			var query = context.OrderDetails.Where(e=>e.Order.Customer.Country== "France").GroupBy(e => e.OrderId)
+									 .Select(e => new
+									 {
+										 OrderId = e.Key,
+										 totalvalue = e.Sum(e => e.UnitPrice * e.Quantity)
+									 }).OrderByDescending(e => e.totalvalue).Take(5);
+
+		}
+		public void Query30(){
+			//Write a LINQ query to group the Orders table by ShipCountry,
+			//retrieve a list of ShipCountry and the count of orders for each country,
+			//and then find the last country (sorted by ShipCountry alphabetically)
+			//that has more than 20 orders placed in 1997.
+
+			var query = context.Orders.Where(e=>e.OrderDate.Value.Year==1997).GroupBy(e => e.ShipCountry)
+								 .Select(e => new
+								 {
+									 ShipCountry = e.Key,
+									 countoforders = e.Count()
+								 }).Where(e => e.countoforders > 20).OrderBy(e => e.ShipCountry).LastOrDefault();
+
+		}
+		public void Query31(){
+			//Write a LINQ query to group the Order Details table by ProductID,
+			//retrieve a list of ProductID and the average Discount for each product,
+			//and then check if any product ordered in orders shipped to "USA"
+			//has an average Discount greater than 0.15. Return a boolean result.
+
+			var query = context.OrderDetails.Where(e => e.Order.ShipCountry == "USA").GroupBy(e => e.ProductId)
+									.Select(e => new
+									{
+										ProductId = e.Key,
+										averageDiscount = e.Average(e => e.Discount)
+									}).Any(e => e.averageDiscount > 0.15);
+
+		}
+		public void Query32()
+		{
+			//Write a LINQ query to group the Orders table by EmployeeID,
+			//retrieve a list of EmployeeID and the average Freight cost for each employee,
+			//and then check if all employees who handled orders shipped to "Canada" in 1996
+			//have an average Freight cost less than 200. Return a boolean result.
+
+			var query = context.Orders.Where(e=>e.ShipCountry=="Canada"&&e.OrderDate.Value.Year==1996)
+				                       .GroupBy(e => e.EmployeeId)
+									   .Select(e => new
+									   {
+										   EmployeeID = e.Key,
+										   averageFreightCost = e.Average(e => e.Freight)
+									   }).All(e => e.averageFreightCost < 200);
+		
+		}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
+		//public void Query1(){}
 		//public void Query1(){}
 	}
 }
