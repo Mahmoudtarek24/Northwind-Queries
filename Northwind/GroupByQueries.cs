@@ -463,8 +463,8 @@ namespace Northwind
 		}
 		public void Query32()
 		{
-			//Write a LINQ query to group the Orders table by EmployeeID,
-			//retrieve a list of EmployeeID and the average Freight cost for each employee,
+			//Write a LINQ query to group the Orders table by EmployeeID,retrieve a list of EmployeeID
+			// and the average Freight cost for each employee,
 			//and then check if all employees who handled orders shipped to "Canada" in 1996
 			//have an average Freight cost less than 200. Return a boolean result.
 
@@ -477,9 +477,57 @@ namespace Northwind
 									   }).All(e => e.averageFreightCost < 200);
 		
 		}
-		//public void Query1(){}
-		//public void Query1(){}
-		//public void Query1(){}
+		public void Query33()
+		{
+			//Write a LINQ query to group the Orders table by ShipCountry,
+			//retrieve a list of ShipCountry and the total Freight cost for each country,
+			//and then find the first country (sorted by ShipCountry alphabetically)
+			//that has a total Freight cost greater than 5000 and includes orders placed
+			//by employees whose Title contains "Sales" in 1997.
+
+
+			var query = context.Orders.Where(e=>e.Employee.Title.Contains("Sales")&&e.OrderDate.Value.Year==1997)
+				                      .GroupBy(e => e.ShipCountry)
+									  .Select(e => new
+									  {
+										  ShipCountry = e.Key,
+										  TotalFreigt = e.Sum(e => e.Freight)
+									  }).Where(e => e.TotalFreigt > 5000)
+									  .OrderBy(e => e.ShipCountry).FirstOrDefault();
+
+
+
+		}
+		public void Query34(){
+			//Write a LINQ query to group the Order Details table by ProductID,
+			//retrieve a list of ProductID and the total Quantity ordered for each product,
+			//and then check if any product ordered in orders placed by customers
+			//from "Spain" in 1998 has a total Quantity greater than 1000. Return a boolean result.
+
+
+			var query = context.OrderDetails.Where(e => e.Order.Customer.Country == "Spain" && e.Order.OrderDate.Value.Year == 1998)
+										  .GroupBy(e => e.ProductId)
+										  .Select(e => new
+										  {
+											  ProductId = e.Key,
+											  TotalQuentity = e.Sum(e => e.Quantity)
+										  }).Any(e => e.TotalQuentity > 1000);
+				                     
+
+		}
+		public void Query35(){
+			//Write a LINQ query to group the Order Details table by ProductID,
+			//then group the results by the year of the OrderDate (from the related Order),
+			//and retrieve a list of the year, ProductID, and the total Quantity ordered for each product in that year.
+			//Only include products ordered by customers from "USA",
+			//and sort the results by year and then by total Quantity in descending order.
+
+
+
+			var query=context=context.OrderDetails.GroupBy(e=>e.ProductId)
+
+
+		}
 		//public void Query1(){}
 		//public void Query1(){}
 		//public void Query1(){}
