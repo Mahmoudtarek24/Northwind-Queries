@@ -60,9 +60,10 @@ D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.GeneratedMSBuildEditor
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.AssemblyInfoInputs.cache
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.AssemblyInfo.cs
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.csproj.CoreCompileInputs.cache
-D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.csproj.CopyComplete
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.dll
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\refint\Northwind.dll
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.pdb
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\Northwind.genruntimeconfig.cache
 D:\Project\Northwind\Northwind\obj\Debug\net7.0\ref\Northwind.dll
+D:\Project\northwind\Northwind\obj\Debug\net7.0\Northwind.sourcelink.json
+D:\Project\northwind\Northwind\obj\Debug\net7.0\Northwind.csproj.Up2Date

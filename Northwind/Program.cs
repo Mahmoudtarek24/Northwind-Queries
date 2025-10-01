@@ -11,6 +11,11 @@ namespace Northwind
 		static void Main(string[] args)
 		{
 	
+			var date=DateTime.Now.ToString();
+
+			var dadestring = DateTime.Parse(date);
+
+			Console.WriteLine(dadestring);
 		}
 	}
 }
