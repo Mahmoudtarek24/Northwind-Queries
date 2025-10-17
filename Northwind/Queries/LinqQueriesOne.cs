@@ -1,9 +1,14 @@
-﻿using Northwind.Models;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
+using Northwind.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Northwind.Queries
 {
@@ -116,15 +121,124 @@ namespace Northwind.Queries
 		public void query34() => context.Employees.OrderByDescending(e => e.HireDate).Last();
 		// Group products by category and select category ID with product count 
 		public void query35() => context.Products.GroupBy(e => e.CategoryId)
-			                            .Select(e=>new
-										{
+		.Select(e=>new
+		{
 											categoryId= e.Key,
 											productCount= e.Count()
 										}).ToList();
+		//Check if all products have a unit price greater than $0
+		public void query36() => context.Products.All(e => e.UnitPrice > 0);
+		//Get customers from USA or UK using Contains with a list
+		public void query37() => context.Customers.Where(e => e.Country == "USA" || e.Country == "UK").ToList();
+		//Get the average order freight cost for orders shipped to Germany
+		public void query38() => context.Orders.Where(e => e.ShipCountry == "Germany").Average(e => e.Freight);
+		//Get product names starting with letters A-M(first half of alphabet)
+	    public void query39() => context.Products.Where(e => e.ProductName[0] >= 'A' && e.ProductName[0] <= 'M')
+		                                         .ToList();
+		//Get the 3rd page of products(page size = 10) using Skip and Take
+		public void query40() => context.Products.Skip((3-1)*10).Take(10).ToList();
+		//Get all orders where order date and shipped date are in the same month
+		public void query41() => context.Orders.Where(e => e.ShippedDate.Value.Month == e.OrderDate.Value.Month).ToList();
+		//Find the maximum units in stock across all products
+		public void query42() => context.Products.Max(e => e.UnitsInStock);
+		//Get employees who report to employee ID 2, return full names only
+		public void query43() => context.Employees.Where(e=>e.ReportsTo==2).Select(e => e.FirstName + " " + e.LastName)
+		                                          .ToList();
+		//Combine two lists: customers from France + customers from Spain using Union
+		public void query44() => context.Customers.Where(e => e.Country == "France")
+										.Union(context.Customers.Where(e => e.Country == "Spain")).ToList();
+		//Get order IDs where at least one order detail has quantity > 50
+		public void query45() => context.Orders.Where(e=>e.OrderDetails.Any(e=>e.Quantity>50))
+		                                .Select(o => o.OrderId).ToList();
+		//Get products with the top 5 highest unit prices, show name and price
+		public void query46() => context.Products.OrderByDescending(e => e.UnitPrice).Take(5)
+			                                 .Select(e => new { e.ProductName, e.UnitPrice }).ToList();
+		//Check if customer "ALFKI" exists in the database
+		public void query47() => context.Customers.Any(e => e.ContactName == "ALFKI");
+		//Get distinct countries from both Customers and Suppliers tables using Union 
+		public void query48() => context.Customers.Select(e => e.Country)
+								 .Union(context.Suppliers.Select(e => e.Country)).ToList();
+		//Get the first product alphabetically, or null if no products exist
+		public void query49() => context.Products.OrderBy(p => p.ProductName).FirstOrDefault();
+		//Group employees by city, then count and order by count descending
+		public void query50() => context.Employees.GroupBy(e=>e.City)
+									.Select(g => new
+									{
+										City = g.Key,
+										EmployeeCount = g.Count()
+									}).OrderByDescending(e=>e.EmployeeCount).ToList();
+		//Get all orders placed in the last quarter of 1996 (Oct-Dec)
+		public void query51() => context.Orders.Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Year == 1996 &&
+			                                   (o.OrderDate.Value.Month >= 10 && o.OrderDate.Value.Month <= 12)).ToList();
+		//Get products where units in stock + units on order > 100
+		public void query52() => context.Products.Where(e=>(e.UnitsInStock+e.UnitsOnOrder)>100).ToList();
+		//Get the total sum of (quantity * unit price) for all order details
+		public void query53() => context.OrderDetails.Sum(e => e.Quantity * e.UnitPrice);
+		//Get customers who have placed more than 10 orders
+		public void query54() => context.Orders.GroupBy(e=>e.CustomerId)
+			                     .Select(e=>new
+								 {
+									 key =e.Key,
+									 ordercount = e.Count()
+								 }).Where(e=>e.ordercount>10).ToList();
 
-		//public void query36() =>
-		//public void query37() =>
-		//public void query38() =>
+		//    context.Customers.Where(c => c.Orders.Count() > 10)
+		//       .Select(c => new
+		//       {
+		//           c.CustomerId,
+		//           c.CompanyName,
+		//           OrderCount = c.Orders.Count()
+		//	      }).ToList();
+
+		//Take products while unit price is less than $20 (use TakeWhile)
+		//public void query55() => 
+		//Get the employee with the earliest birth date (oldest employee)
+		public void query56() => context.Employees.OrderBy(e => e.BirthDate).FirstOrDefault();
+		//Get all unique regions from customers (excluding nulls and empty strings)
+		//public void query39() =>
+		//Join orders with customers, show order ID, date, and customer company name
+		//public void query39() =>
+		//Get products that have never been ordered (left join scenario)
+		//public void query39() =>
+		//Get the top 3 customers by total number of orders placed
+		//public void query39() =>
+		//Check if there are any orders with null shipped date (not shipped yet)
+		//public void query39() =>
+		//Get all products grouped by supplier, show supplier ID and total units in stock
+		//public void query39() =>
+		//Get orders from 1997 where freight is between $50 and $200
+		//public void query39() =>
+		//Get the 2nd most expensive product
+		//public void query39() =>
+		//Select first 100 orders, then group by customer and count
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+
+		//public void query39() =>
+
 		//public void query39() =>
 	}
 }
