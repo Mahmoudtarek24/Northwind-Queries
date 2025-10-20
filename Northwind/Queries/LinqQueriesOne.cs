@@ -195,22 +195,122 @@ namespace Northwind.Queries
 		//Get the employee with the earliest birth date (oldest employee)
 		public void query56() => context.Employees.OrderBy(e => e.BirthDate).FirstOrDefault();
 		//Get all unique regions from customers (excluding nulls and empty strings)
-		//public void query39() =>
+		public void query57() => context.Customers.Select(e => e.Region).Distinct().ToList();
 		//Join orders with customers, show order ID, date, and customer company name
-		//public void query39() =>
+		public void query58() => (from ord in context.Orders
+								  join cust in context.Customers on ord.CustomerId equals cust.CustomerId
+								  select new
+								  {
+									  orderId = ord.OrderId,
+									  companyName = cust.CompanyName,
+								  }).ToList();
 		//Get products that have never been ordered (left join scenario)
-		//public void query39() =>
+		public void query59() => (from prod in context.Products
+								  join OrdDet in context.OrderDetails
+									  on prod.ProductId equals OrdDet.ProductId into productOrders
+								  from OrdDet in productOrders.DefaultIfEmpty()
+								  where OrdDet == null
+								  select prod).ToList();
+
 		//Get the top 3 customers by total number of orders placed
-		//public void query39() =>
+		public void query60() => context.Customers.OrderByDescending(e=>e.Orders.Count())
+			                            .Take(3).Select(e=> new
+										{
+											e.CustomerId,
+											e.CompanyName,
+											TotalOrders = e.Orders.Count()
+										}).ToList();
 		//Check if there are any orders with null shipped date (not shipped yet)
-		//public void query39() =>
+		public void query61() => context.Orders.Any(e => e.ShippedDate == null);
 		//Get all products grouped by supplier, show supplier ID and total units in stock
-		//public void query39() =>
+		public void query62() => context.Products.GroupBy(e => e.SupplierId)
+										.Select(e => new
+										{
+											supplierId = e.Key,
+											totalUnit = e.Sum(e => e.UnitsInStock)
+										}).ToList();
 		//Get orders from 1997 where freight is between $50 and $200
-		//public void query39() =>
+		public void query63() => context.Orders.Where(e => e.OrderDate.Value.Year == 1997 &&
+		                                       (e.Freight >= 50 && e.Freight <= 200)).ToList();
 		//Get the 2nd most expensive product
-		//public void query39() =>
+		public void query64() => context.Products.OrderByDescending(e => e.UnitPrice).Skip(1).Take(1);
 		//Select first 100 orders, then group by customer and count
+		public void query65() => context.Orders.Take(100).GroupBy(o => o.CustomerId)
+										.Select(g => new
+										{
+											CustomerId = g.Key,
+											OrderCount = g.Count()
+										}).ToList();
+		//Get all employees except those from "London" or "Seattle"
+		public void query66() => context.Employees.Where(e => e.City != "London" && e.City != "Seattle").ToList();
+ 		//Get product categories with average product price > $30
+		public void query67() => context.Products.GroupBy(e=>e.CategoryId)
+			                             .Select(e=>new
+										 {
+											 CategoryId = e.Key,
+											 AveragePrice = e.Average(p => p.UnitPrice)
+										 }).Where(e=>e.AveragePrice>30).ToList();
+		//Get distinct employee cities and customer cities combined
+		public void query68() => context.Employees.Select(e => e.City).Union(context.Customers.Select(e => e.City)).ToList();
+		//Get the difference between max and min product prices using aggregation
+		//	public void query69() => ;
+		//Get all orders where customer ID starts with 'A' and employee ID is even
+		public void query70() => context.Orders.Where(e => e.CustomerId.StartsWith("A") && e.EmployeeId % 2 == 0).ToList();
+		//Zip product names with their category names into tuples
+		//public void query71() => 
+		//Get order details where discount is greater than 0, group by product
+		public void query72() => context.OrderDetails.Where(od => od.Discount > 0).GroupBy(e=>e.ProductId)
+			                            .Select(e=>new
+										{
+											ProductId = e.Key,
+											CountOrdersWithDiscount = e.Count(),
+											TotalDiscount = e.Sum(od => od.Discount)
+										}).ToList();	
+		//Get customers who have the same city as any supplier
+		//public void query39() =>
+		//Get all products, if none exist return a default empty list
+		//public void query39() =>
+		//Get the last 10 orders by order date, then reverse the list
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
+		//public void query39() =>
+		//
 		//public void query39() =>
 		//
 		//public void query39() =>
@@ -237,8 +337,5 @@ namespace Northwind.Queries
 		//
 		//public void query39() =>
 
-		//public void query39() =>
-
-		//public void query39() =>
 	}
 }
