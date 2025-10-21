@@ -265,12 +265,98 @@ namespace Northwind.Queries
 											ProductId = e.Key,
 											CountOrdersWithDiscount = e.Count(),
 											TotalDiscount = e.Sum(od => od.Discount)
-										}).ToList();	
+										}).ToList();
 		//Get customers who have the same city as any supplier
-		//public void query39() =>
+		public void query73() => context.Customers.Where(e => context.Suppliers.Select(s => s.City).Contains(e.City)).ToList();
 		//Get all products, if none exist return a default empty list
-		//public void query39() =>
+		public List<Product> query74() => context.Products.ToList() ?? new List<Product>();
 		//Get the last 10 orders by order date, then reverse the list
+		public void query75() => context.Orders.OrderByDescending(e => e.OrderDate).Take(10)
+			                            .OrderBy(e => e.OrderDate).ToList();
+		//Get orders shipped by shipper "Federal Shipping", include shipper name
+		public void query76() => context.Orders.Where(o => o.ShipName == "Federal Shipping")
+									   .Select(o => new
+									   {
+										   o.OrderId,
+										   o.OrderDate,
+										   o.ShippedDate,
+										   ShipperName = o.ShipName
+									   }).ToList();
+		//Get employees and their subordinates count (who report to them)
+		public void query77() => context.Employees
+			.Select(e => new
+			{
+				EmployeeId = e.EmployeeId,
+				FullName = e.FirstName + " " + e.LastName,
+				SubordinatesCount = context.Employees.Count(e => e.ReportsTo == e.EmployeeId)
+			}).ToList();
+		//Get products where name contains "Chef" or "Tofu" (case-insensitive)
+		public void query78() => context.Products.Where(e => e.ProductName.ToLower().Contains("chef".ToLower())
+			                		|| e.ProductName.ToLower().Contains("tofu".ToLower())).ToList();
+		//Calculate total revenue: sum of (unitprice * quantity * (1-discount)) for all orders
+		public void query79() => context.OrderDetails
+		                            .Sum(od => od.UnitPrice * od.Quantity * (1 - (decimal)od.Discount));
+		//Get the median unit price of products (middle value when sorted)
+		public void query80()
+		{
+			var prices = context.Products.OrderBy(e => e.UnitPrice).Select(e => e.UnitPrice).ToList();
+			var count = prices.Count();
+			decimal? median;
+			if (count == 0)
+				median = 0; 
+			else if (count % 2 == 0)
+				median = (prices[count / 2 - 1] + prices[count / 2]) / 2;
+			else
+				median = prices[count / 2];
+		}
+		//Get customers who have ordered products from category "Seafood"
+		public void query81() => (from cust in context.Customers
+								  join ord in context.Orders on cust.CustomerId equals ord.CustomerId
+								  join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+								  join prod in context.Products on ordDet.ProductId equals prod.ProductId
+								  join cat in context.Categories on prod.CategoryId equals cat.CategoryId
+								  where cat.CategoryName == "Seafood"
+								  select cust).ToList();
+		//Skip products while price < $10, then take next 5 products
+		public void query82() => context.Products.OrderBy(p => p.ProductId)        
+		                                .SkipWhile(p => p.UnitPrice < 10) .Take(5).ToList();
+		//Get all orders grouped by year and month, show count per period
+		public void query83() => context.Orders.GroupBy(e => new { e.OrderDate!.Value.Year, e.OrderDate!.Value.Month })
+										.Select(e => new
+										{
+											month = e.Key.Month,
+											year = e.Key.Year,
+											count = e.Count()
+										}).ToList();
+		//Get the least expensive product from each category
+		public void query84() => context.Products.GroupBy(e => e.CategoryId)
+										   .Select(e => new
+										   {
+											   CategoryId = e.Key,
+											   LeastExpensiveProduct = e.OrderBy(e =>e.UnitPrice).FirstOrDefault()
+										   }).ToList();
+		//Check if any employee was born before 1950
+		public void query85() => context.Employees.Any(e => e.BirthDate.Value.Year < 1950);
+		//Get products supplied by companies from USA, sorted by price descending
+		public void query86() => context.Products.Where(e => e.Supplier.Country == "USA")
+			                                .OrderByDescending(e => e.UnitPrice).ToList();
+		//Get employee pairs where one reports to the other (self-join)
+		//public void query87() => 
+		//Get orders with details: order ID, customer name, product names (comma-separated)
+		//public void query39() =>
+		//Get categories that have no discontinued products
+		//public void query39() =>
+		//Get the standard deviation of product prices (use manual calculation with Aggregate)
+		//public void query39() =>
+		//Get customers who ordered in both 1996 AND 1997
+		//public void query39() =>
+		//Get the second page of customers sorted by company name (page size 15)
+		//public void query39() =>
+		//Get products restocked recently: where units on order > reorder level
+		//public void query39() =>
+		//Find orders where total order value exceeds $1000
+		//public void query39() =>
+		//Get territories grouped by region with territory count
 		//public void query39() =>
 		//
 		//public void query39() =>
@@ -320,22 +406,5 @@ namespace Northwind.Queries
 		//public void query39() =>
 		//
 		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-
 	}
 }
