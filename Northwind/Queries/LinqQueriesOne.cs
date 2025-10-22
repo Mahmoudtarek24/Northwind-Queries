@@ -339,44 +339,82 @@ namespace Northwind.Queries
 		public void query85() => context.Employees.Any(e => e.BirthDate.Value.Year < 1950);
 		//Get products supplied by companies from USA, sorted by price descending
 		public void query86() => context.Products.Where(e => e.Supplier.Country == "USA")
-			                                .OrderByDescending(e => e.UnitPrice).ToList();
+			                                .OrderByDescending(e => e.UnitPrice).ToList();////////////
 		//Get employee pairs where one reports to the other (self-join)
-		//public void query87() => 
+		public void query87() => (from emp in context.Employees
+								  join mgr in context.Employees on emp.ReportsTo equals mgr.EmployeeId
+								  select new
+								  {
+									  EmployeeName = emp.FirstName + " " + emp.LastName,
+									  ManagerName = mgr.FirstName + " " + mgr.LastName
+								  }).ToList();
 		//Get orders with details: order ID, customer name, product names (comma-separated)
-		//public void query39() =>
+		public void query88() => (from ord in context.Orders
+								  join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+								  join prod in context.Products on ordDet.ProductId equals prod.ProductId
+								  join cust in context.Customers on ord.CustomerId equals cust.CustomerId
+								  select new
+								  {
+									  OrderId = ord.OrderId,
+									  customerName = cust.ContactName,
+									  ProductName = prod.ProductName,
+								  }).ToList();
 		//Get categories that have no discontinued products
-		//public void query39() =>
+		public void query89() => context.Categories.Where(e=>e.Products.All(e=>!e.Discontinued)).ToList();
 		//Get the standard deviation of product prices (use manual calculation with Aggregate)
-		//public void query39() =>
+		//public void query90() => 
 		//Get customers who ordered in both 1996 AND 1997
-		//public void query39() =>
+		public void query91() =>    context.Customers.Where(c => c.Orders.Any(o => o.OrderDate.Value.Year == 1996) &&
+                                   c.Orders.Any(o => o.OrderDate.Value.Year == 1997)).ToList();
 		//Get the second page of customers sorted by company name (page size 15)
-		//public void query39() =>
+		public void query92() => context.Customers.OrderBy(e=>e.ContactName).Skip((2-1)*15).Take(15).ToList();
 		//Get products restocked recently: where units on order > reorder level
-		//public void query39() =>
+		public void query93() => context.Products.Where(p => p.UnitsOnOrder > p.ReorderLevel).ToList();
 		//Find orders where total order value exceeds $1000
-		//public void query39() =>
+		public void query94() => context.Orders
+				 .Where(e => e.OrderDetails.Sum(e => e.UnitPrice * e.Quantity * (1 - (decimal)e.Discount)) > 1000).ToList();
 		//Get territories grouped by region with territory count
+		public void query95() => context.Territories.GroupBy(t => t.Region.RegionDescription)
+										.Select(g => new
+										{
+											Region = g.Key,
+											TerritoryCount = g.Count()
+										}).ToList();
+		//Get the longest company name among customers
+		public void query96() => context.Customers.OrderByDescending(e => e.ContactName.Length).FirstOrDefault();
+		//Get all products from suppliers in the same country as customer "ALFKI"
+		public void query97() => (from cust in context.Customers
+								  join ord in context.Orders on cust.CustomerId equals ord.CustomerId
+								  join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+								  join prod in context.Products on ordDet.ProductId equals prod.ProductId
+								  join sup in context.Suppliers on prod.SupplierId equals sup.SupplierId
+								  where cust.CustomerId == "ALFKI" && cust.Country == sup.Country
+								  select prod).Distinct().ToList();
+		//Get employees hired in the same year, grouped by year
+		//public void query98() => 
+		//Get the top 5 products by total quantity sold across all orders
+		public void query99() => context.OrderDetails.GroupBy(e => e.ProductId)
+										.Select(g => new
+										{
+											ProductId = g.Key,
+											TotalQuantity = g.Sum(e => e.Quantity)
+										}).OrderByDescending(e => e.TotalQuantity).Take(5).ToList();
+		//Get customers with no orders using GroupJoin and filtering
+		public void query100() => (from cust in context.Customers
+								   join ord in context.Orders
+									   on cust.CustomerId equals ord.CustomerId into CustomerOrders
+								   from custOrder in CustomerOrders.DefaultIfEmpty()
+								   where custOrder == null
+								   select cust).ToList();
+		//Get orders where required date is before shipped date (late shipments)
 		//public void query39() =>
-		//
+		//Get the sum of units in stock for discontinued vs active products
 		//public void query39() =>
-		//
+		//Get products that appear in more than 20 orders
 		//public void query39() =>
-		//
+		//Prepend a "dummy" product to the products list
 		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
-		//public void query39() =>
-		//
+		//Get orders from customers in cities with more than 3 customers
 		//public void query39() =>
 		//
 		//public void query39() =>
