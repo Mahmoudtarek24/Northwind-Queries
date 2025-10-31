@@ -88,6 +88,171 @@ namespace Northwind.Queries
 
 			}
 		}
+		//For any product with units in stock less than reorder level AND units on order = 0,
+		//automatically create a "reorder request" by updating units on order to 50.
+		public void Query5()
+		{
+			var productsToReorder = context.Products
+					.Where(p => p.UnitsInStock < p.ReorderLevel && p.UnitsOnOrder == 0).ToList();
+
+			foreach (var product in productsToReorder)
+				product.UnitsOnOrder = 50;
+
+			context.SaveChanges();
+		}
+
+		public void query6()
+		{
+			//Calculates each customer's total purchase amount
+			//(sum of all their order details: quantity × unitprice × (1-discount))
+
+			var totalCustomerPurchase = (from cust in context.Customers
+										 join ord in context.Orders on cust.CustomerId equals ord.CustomerId
+										 join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+										 select new { Customer = cust, Order = ord, OrderDetail = ordDet })
+			 .GroupBy(x => x.Customer.CustomerId)
+			 .Select(g => new
+			 {
+				 CustomerId = g.Key,
+				 TotalPurchase = g.Sum(x => x.OrderDetail.Quantity * x.OrderDetail.UnitPrice * (1 - (decimal)x.OrderDetail.Discount)),
+				 Orders = g.Select(x => x.Order).Distinct().ToList()   
+			 })
+			 .ToList();
+
+			//Categorizes customers into tiers: Bronze (<$5000), Silver ($5000-$15000),
+			//Gold ($15000-$30000), Platinum (>$30000)
+
+
+			var customersTires = totalCustomerPurchase.Select(e=>new
+			{
+				e.CustomerId,
+				e.TotalPurchase,
+				e.Orders,
+				Tiers = e.TotalPurchase > 30000 ? "Platinum" :
+						e.TotalPurchase > 15000 ? "Gold" :
+						e.TotalPurchase > 5000 ? "Silver" : "Bronze"
+		    }).ToList();
+
+			//For Gold/Platinum customers who haven't ordered in the last 6 months,
+			//send them a special offer by creating discount coupons
+			//(insert into hypothetical Coupons table with 15% discount)
+
+			var sixMonthAgo = DateTime.Now.AddMonths(-6);
+			var goldPlatinumCustomers = customersTires
+				.Where(e => e.Tiers == "Platinum" || e.Tiers == "Gold"
+				        && (!e.Orders.Any(e => e.OrderDate >= sixMonthAgo))).ToList();
+
+			foreach(var cust in goldPlatinumCustomers)
+			{
+				var coupon = new Coupon
+				{
+					CustomerId = cust.CustomerId,
+					DiscountPercentage = 15,
+					CreatedDate = DateTime.Now
+				};
+				context.Coupons.Add(coupon);		
+			}
+			context.SaveChanges();
+
+			//If a Bronze customer has more than 20 orders but low total spend,
+			//flag them as "frequent buyer" and update their tier to Silver
+
+			var bronzeCustomers= customersTires.Where(e=>e.Orders.Count()>20)
+				 .Select(e => new
+				 {
+					 e.CustomerId,
+					 e.TotalPurchase,
+					 e.Orders,
+					
+					 Note = "Frequent Buyer"
+				 }).ToList();
+		}
+	
+		public void queryScenario()
+		{
+			//Identifies products where (UnitsInStock < ReorderLevel) AND (UnitsOnOrder = 0)
+
+			var products = context.Products.Include(e=>e.Supplier).Include(e=>e.Category)
+				         .Where(e=>e.UnitsInStock<e.ReorderLevel&&e.UnitsOnOrder==0).ToList();
+
+			//For each product, checks if the supplier is from USA/UK (priority suppliers) or other countries
+
+			var priorityCountries = products.All(e => e.Supplier.Country == "USA" || e.Supplier.Country == "Uk");
+			if(!priorityCountries)
+				Console.WriteLine("not all from USA/UK");
+
+			//Calculates optimal reorder quantity based on: average monthly sales from
+			//order details of last 6 months × 2 (for 2-month buffer)
+
+			var sixMonthsAgo = DateTime.Now.AddMonths(-6);
+			var salesProduct = (from ord in context.Orders
+								join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+								where ord.OrderDate.HasValue && ord.OrderDate.Value >= sixMonthsAgo
+								group ordDet by ordDet.ProductId into g
+								select new
+								{
+									ProductId = g.Key,
+									UnitsSoldLast6Months = g.Sum(od => od.Quantity)
+								}).ToList();
+
+			var reorderSuggestions = salesProduct.Select(p => new
+			{
+				p.ProductId,
+				p.UnitsSoldLast6Months,
+				AverageMonthly = p.UnitsSoldLast6Months / 6.0,
+				ReorderQuantity = (int)Math.Ceiling((p.UnitsSoldLast6Months / 6.0) * 2)
+			}).ToList();
+
+			//If supplier is priority AND product has been ordered by >10 different customers,
+			//create urgent reorder (update UnitsOnOrder)
+
+			// عدد العملاء المختلفين اللي اشتروا المنتج خلال آخر 6 شهور
+			var distinctCustomersCount = (from cust in context.Customers
+										  join ord in context.Orders on cust.CustomerId equals ord.CustomerId
+										  join ordDet in context.OrderDetails on ord.OrderId equals ordDet.OrderId
+										  where ord.OrderDate.HasValue && ord.OrderDate.Value >= sixMonthsAgo
+										  group new { cust.CustomerId } by ordDet.ProductId into g
+										  select new
+										  {
+											  ProductId = g.Key,
+											  CustomerCount = g.Select(x => x.CustomerId).Distinct().Count()
+										  }).ToList();
+			foreach (var prod in products)
+			{
+				bool isPrioritySupplier = prod.Supplier.Country == "USA" || prod.Supplier.Country == "UK";
+
+				var productStats = distinctCustomersCount.FirstOrDefault(x => x.ProductId == prod.ProductId);
+				int customerCount = productStats?.CustomerCount ?? 0;
+				if (isPrioritySupplier && customerCount > 10)
+				{
+					var reorderQty = reorderSuggestions
+										.FirstOrDefault(r => r.ProductId == prod.ProductId)?.ReorderQuantity ?? 0;
+
+					if (reorderQty > 0)
+						prod.UnitsOnOrder = (short)reorderQty;
+				}
+				//If supplier is non-priority OR product is low-demand (<5 customers),
+				//check if similar products from same category exist with better stock levels
+				if (!isPrioritySupplier && customerCount < 5)
+				{
+					var alternative = context.Products
+						.Where(e => e.CategoryId == prod.CategoryId && e.UnitsInStock > prod.UnitsInStock)
+						.OrderByDescending(e => e.UnitsInStock).FirstOrDefault();
+					if (alternative != null)
+					{
+						prod.Discontinued = true;
+
+						var pendingOrders = context.OrderDetails
+							.Where(o => o.ProductId == prod.ProductId && o.Order.Status == "Pending")
+							.ToList();
+
+						foreach (var order in pendingOrders)
+							order.ProductId = alternative.ProductId;
+					}
+				}
+			}
+			context.SaveChanges();
+		}
 
 	}
 }

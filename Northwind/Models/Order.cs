@@ -32,8 +32,8 @@ public partial class Order
     public string? ShipPostalCode { get; set; }
 
     public string? ShipCountry { get; set; }
-
-    public virtual Customer? Customer { get; set; }
+    public string? Status { get; set; }  
+	public virtual Customer? Customer { get; set; }
 
     public virtual Employee? Employee { get; set; }
 
